@@ -8,11 +8,11 @@ import io.flutter.plugins.geofencing.GeofencingService
 
 class Application : FlutterApplication(), PluginRegistrantCallback {
   override fun onCreate() {
-    super.onCreate();
-    GeofencingService.setPluginRegistrant(this);
+    super.onCreate()
+      GeofencingService.setPluginRegistrant(this)
   }
 
   override fun registerWith(registry: PluginRegistry) {
-    GeneratedPluginRegistrant.registerWith(registry);
+    GeneratedPluginRegistrant.registerWith(registry)
   }
 }

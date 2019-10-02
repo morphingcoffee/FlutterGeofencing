@@ -11,8 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.os.PowerManager
-import android.support.v4.app.NotificationCompat
-import android.util.Log
+import androidx.core.app.NotificationCompat
 import io.flutter.view.FlutterNativeView
 
 class IsolateHolderService : Service() {
@@ -32,8 +31,8 @@ class IsolateHolderService : Service() {
         }
     }
 
-    override fun onBind(p0: Intent) : IBinder? {
-        return null;
+    override fun onBind(p0: Intent): IBinder? {
+        return null
     }
 
     override fun onCreate() {
@@ -61,7 +60,7 @@ class IsolateHolderService : Service() {
         startForeground(1, notification)
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int) : Int {
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         if (intent.getAction() == ACTION_SHUTDOWN) {
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
                 newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG).apply {
@@ -73,6 +72,6 @@ class IsolateHolderService : Service() {
             stopForeground(true)
             stopSelf()
         }
-        return START_STICKY;
+        return START_STICKY
     }
 }

@@ -6,24 +6,20 @@ package io.flutter.plugins.geofencing
 
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
-import android.os.PowerManager
-import android.support.v4.app.JobIntentService
 import android.util.Log
+import androidx.core.app.JobIntentService
+import com.google.android.gms.location.GeofencingEvent
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
 import io.flutter.view.FlutterRunArguments
-import java.util.ArrayDeque
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.UUID
-
-import com.google.android.gms.location.GeofencingEvent
 
 class GeofencingService : MethodCallHandler, JobIntentService() {
     private val queue = ArrayDeque<List<Any>>()
@@ -87,8 +83,8 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
         mBackgroundChannel.setMethodCallHandler(this)
     }
 
-   override fun onMethodCall(call: MethodCall, result: Result) {
-       when(call.method) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
+        when (call.method) {
             "GeofencingService.initialized" -> {
                 synchronized(sServiceStarted) {
                     while (!queue.isEmpty()) {

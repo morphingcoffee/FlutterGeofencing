@@ -16,13 +16,12 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONArray
-import org.json.JSONObject
 
 class GeofencingPlugin(context: Context, activity: Activity?) : MethodCallHandler {
     private val mContext = context
