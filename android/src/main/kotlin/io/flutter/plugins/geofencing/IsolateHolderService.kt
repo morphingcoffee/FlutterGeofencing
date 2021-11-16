@@ -12,7 +12,8 @@ import android.content.Intent
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import io.flutter.view.FlutterNativeView
+import android.util.Log
+import io.flutter.embedding.engine.FlutterEngine
 
 class IsolateHolderService : Service() {
     companion object {
@@ -23,11 +24,11 @@ class IsolateHolderService : Service() {
         @JvmStatic
         private val TAG = "IsolateHolderService"
         @JvmStatic
-        private var sBackgroundFlutterView: FlutterNativeView? = null
+        private var sBackgroundFlutterEngine: FlutterEngine? = null
 
         @JvmStatic
-        fun setBackgroundFlutterView(view: FlutterNativeView?) {
-            sBackgroundFlutterView = view
+        fun setBackgroundFlutterEngine(engine: FlutterEngine?) {
+            sBackgroundFlutterEngine = engine
         }
     }
 

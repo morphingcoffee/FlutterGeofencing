@@ -5,6 +5,8 @@
 .pub/
 pubspec.lock
 
+.idea/
+
 build/
 
 **/.idea/

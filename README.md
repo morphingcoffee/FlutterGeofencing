@@ -1,3 +1,8 @@
+**Author's Note:** this plugin is not officially supported and is meant to be used as an example. Please feel free to pull it into your own projects, but _there is no official version hosted on pub.dev and support may be limited_. If you run into any issues running this sample, please file an issue or, even better, submit a pull request!
+
+What is geofencing? 
+[here](https://developer.android.com/training/location/geofencing)
+
 # Geofencing
 
 A sample geofencing plugin with background execution support for Flutter.
@@ -22,6 +27,7 @@ Also request the correct permissions for geofencing:
 
 ```xml
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
 
 Finally, create either `Application.kt` or `Application.java` in the same directory as `MainActivity`.

@@ -6,20 +6,29 @@ package io.flutter.plugins.geofencing
 
 import android.content.Context
 import android.content.Intent
+import android.os.IBinder
+import android.os.PowerManager
+import android.os.Handler
 import android.util.Log
 import androidx.core.app.JobIntentService
-import com.google.android.gms.location.GeofencingEvent
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import io.flutter.view.FlutterNativeView
 import io.flutter.view.FlutterRunArguments
-import java.util.*
+import java.util.ArrayDeque
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.UUID
+
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.embedding.engine.dart.DartExecutor.DartCallback
+
+import com.google.android.gms.location.GeofencingEvent
 
 class GeofencingService : MethodCallHandler, JobIntentService() {
     private val queue = ArrayDeque<List<Any>>()
@@ -32,7 +41,7 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
         @JvmStatic
         private val JOB_ID = UUID.randomUUID().mostSignificantBits.toInt()
         @JvmStatic
-        private var sBackgroundFlutterView: FlutterNativeView? = null
+        private var sBackgroundFlutterEngine: FlutterEngine? = null
         @JvmStatic
         private val sServiceStarted = AtomicBoolean(false)
 
@@ -53,11 +62,15 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
     private fun startGeofencingService(context: Context) {
         synchronized(sServiceStarted) {
             mContext = context
-            if (sBackgroundFlutterView == null) {
+            if (sBackgroundFlutterEngine == null) {
                 val callbackHandle = context.getSharedPreferences(
                         GeofencingPlugin.SHARED_PREFERENCES_KEY,
                         Context.MODE_PRIVATE)
                         .getLong(GeofencingPlugin.CALLBACK_DISPATCHER_HANDLE_KEY, 0)
+                if (callbackHandle == 0L) {
+                    Log.e(TAG, "Fatal: no callback registered")
+                    return
+                }
 
                 val callbackInfo = FlutterCallbackInformation.lookupCallbackInformation(callbackHandle)
                 if (callbackInfo == null) {
@@ -65,26 +78,24 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
                     return
                 }
                 Log.i(TAG, "Starting GeofencingService...")
-                sBackgroundFlutterView = FlutterNativeView(context, true)
+                sBackgroundFlutterEngine = FlutterEngine(context)
 
-                val registry = sBackgroundFlutterView!!.pluginRegistry
-                sPluginRegistrantCallback.registerWith(registry)
-                val args = FlutterRunArguments()
-                args.bundlePath = FlutterMain.findAppBundlePath(context)
-                args.entrypoint = callbackInfo.callbackName
-                args.libraryPath = callbackInfo.callbackLibraryPath
-
-                sBackgroundFlutterView!!.runFromBundle(args)
-                IsolateHolderService.setBackgroundFlutterView(sBackgroundFlutterView)
+                val args = DartCallback(
+                    context.getAssets(),
+                    FlutterMain.findAppBundlePath(context)!!,
+                    callbackInfo
+                )
+                sBackgroundFlutterEngine!!.getDartExecutor().executeDartCallback(args)
+                IsolateHolderService.setBackgroundFlutterEngine(sBackgroundFlutterEngine)
             }
         }
-        mBackgroundChannel = MethodChannel(sBackgroundFlutterView,
+        mBackgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.getDartExecutor().getBinaryMessenger(),
                 "plugins.flutter.io/geofencing_plugin_background")
         mBackgroundChannel.setMethodCallHandler(this)
     }
 
-    override fun onMethodCall(call: MethodCall, result: Result) {
-        when (call.method) {
+   override fun onMethodCall(call: MethodCall, result: Result) {
+       when(call.method) {
             "GeofencingService.initialized" -> {
                 synchronized(sServiceStarted) {
                     while (!queue.isEmpty()) {
@@ -142,7 +153,7 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
                 queue.add(geofenceUpdateList)
             } else {
                 // Callback method name is intentionally left blank.
-                mBackgroundChannel.invokeMethod("", geofenceUpdateList)
+                Handler(mContext.mainLooper).post { mBackgroundChannel.invokeMethod("", geofenceUpdateList) }
             }
         }
     }
