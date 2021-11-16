@@ -10,6 +10,7 @@ import android.os.Handler
 import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.GeofencingEvent
+import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor.DartCallback
 import io.flutter.embedding.engine.loader.FlutterLoader
@@ -74,7 +75,7 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
 
                 val args = DartCallback(
                     context.assets,
-                    FlutterLoader().findAppBundlePath(),
+                    FlutterInjector.instance().flutterLoader().findAppBundlePath(),
                     callbackInfo
                 )
                 sBackgroundFlutterEngine!!.dartExecutor.executeDartCallback(args)

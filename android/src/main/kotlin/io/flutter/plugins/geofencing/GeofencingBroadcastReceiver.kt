@@ -7,7 +7,9 @@ package io.flutter.plugins.geofencing
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.loader.FlutterLoader
+import io.flutter.view.FlutterMain
 
 
 class GeofencingBroadcastReceiver : BroadcastReceiver() {
@@ -16,8 +18,8 @@ class GeofencingBroadcastReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        FlutterLoader().startInitialization(context)
-        FlutterLoader().ensureInitializationComplete(context, null)
+        FlutterInjector.instance().flutterLoader().startInitialization(context)
+        FlutterInjector.instance().flutterLoader().ensureInitializationComplete(context, null)
         GeofencingService.enqueueWork(context, intent)
     }
 }
