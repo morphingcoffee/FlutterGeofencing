@@ -6,29 +6,22 @@ package io.flutter.plugins.geofencing
 
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
-import android.os.PowerManager
 import android.os.Handler
 import android.util.Log
 import androidx.core.app.JobIntentService
+import com.google.android.gms.location.GeofencingEvent
+import io.flutter.FlutterInjector
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor.DartCallback
+import io.flutter.embedding.engine.loader.FlutterLoader
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.view.FlutterCallbackInformation
-import io.flutter.view.FlutterMain
-import io.flutter.view.FlutterNativeView
-import io.flutter.view.FlutterRunArguments
-import java.util.ArrayDeque
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.UUID
-
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.embedding.engine.dart.DartExecutor.DartCallback
-
-import com.google.android.gms.location.GeofencingEvent
 
 class GeofencingService : MethodCallHandler, JobIntentService() {
     private val queue = ArrayDeque<List<Any>>()
@@ -81,15 +74,15 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
                 sBackgroundFlutterEngine = FlutterEngine(context)
 
                 val args = DartCallback(
-                    context.getAssets(),
-                    FlutterMain.findAppBundlePath(context)!!,
+                    context.assets,
+                    FlutterInjector.instance().flutterLoader().findAppBundlePath(),
                     callbackInfo
                 )
-                sBackgroundFlutterEngine!!.getDartExecutor().executeDartCallback(args)
+                sBackgroundFlutterEngine!!.dartExecutor.executeDartCallback(args)
                 IsolateHolderService.setBackgroundFlutterEngine(sBackgroundFlutterEngine)
             }
         }
-        mBackgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.getDartExecutor().getBinaryMessenger(),
+        mBackgroundChannel = MethodChannel(sBackgroundFlutterEngine!!.dartExecutor.binaryMessenger,
                 "plugins.flutter.io/geofencing_plugin_background")
         mBackgroundChannel.setMethodCallHandler(this)
     }
@@ -109,7 +102,7 @@ class GeofencingService : MethodCallHandler, JobIntentService() {
             }
             "GeofencingService.demoteToBackground" -> {
                 val intent = Intent(mContext, IsolateHolderService::class.java)
-                intent.setAction(IsolateHolderService.ACTION_SHUTDOWN)
+                intent.action = IsolateHolderService.ACTION_SHUTDOWN
                 mContext.startForegroundService(intent)
             }
             else -> result.notImplemented()
