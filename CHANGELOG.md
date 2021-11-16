@@ -2,6 +2,7 @@
 
 * Updated to Dart sound null safety. Dart SDK 2.12+, Flutter 2+.
 * Android manifest refactoring - permissions are now part of the plugin.
+* Android minSdk bumped to 26
 
 ## 0.1.0
 
